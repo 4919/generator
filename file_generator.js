@@ -7,6 +7,7 @@ const csvSync = require('csv-parse/lib/sync');
 
 //行数調整
 const school_count = 10 //学校数
+const day_count = 10 // 日数
 
 //食品情報
 // TODO: csvから読み出せるようにする
@@ -30,7 +31,7 @@ function getFoodInfo(index){
   return foodArr[index]
 }
 
-function createRow(province, town, name, menu_index){
+function createRow(province, town, name, day_index, menu_index,){
   return {
     "全国地方公共団体コード": "011011",
     "都道府県名": province,
@@ -39,7 +40,7 @@ function createRow(province, town, name, menu_index){
     "学校名": name,
     "学年": "小学校中学年",
     "レコードID": 1,
-    "年月日": dayjs().format('YYYY-MM-DD'),
+    "年月日": dayjs().add(day_index, 'd').format('YYYY-MM-DD'),
     "献立ID": "",
     "料理ID": menu_index,
     "料理名称": foodArr[menu_index].menu_item_name,
@@ -92,9 +93,12 @@ function createRow(province, town, name, menu_index){
       }  
     )
   }
+
   schoolArr.forEach((school)=>{
-    for(let i=0; i<foodArr.length; i++){
-      data.push(createRow(school.province, school.town, school.name, i))
+    for(let i=0; i<day_count; i++){
+      for(let j=0; j<foodArr.length; j++){
+        data.push(createRow(school.province, school.town, school.name, i, j))
+      }
     }
   })
 

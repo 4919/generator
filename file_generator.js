@@ -1,22 +1,25 @@
 const fs = require("fs");
 const faker = require("faker");
+const dayjs = require("dayjs");
 faker.locale = "ja";
 const stringify = require("csv-stringify/lib/sync");
+const csvSync = require('csv-parse/lib/sync');
 
 //行数調整
 const school_count = 10 //学校数
-const menu_count = 10 //1つの学校あたりのメニュー数
 
 //食品情報
 // TODO: csvから読み出せるようにする
-const foodArr = [
-  {
-    ingredient_standard_name: "＜牛乳及び乳製品＞（液状乳類）普通牛乳",
-    ingredient_local_name: "牛乳",
-    food_group_6: "2",
-    food_group_3: "赤"
+const foodArr = csvSync(fs.readFileSync('./menu.csv')).map(menu => {
+  return {
+    menu_item_name: menu[0],
+    ingredient_standard_name: menu[1],
+    ingredient_local_name: menu[2],
+    food_group_6: menu[3],
+    food_group_3: menu[4],
+    allergens: menu[5]
   }
-]
+})
 
 //乱数生成
 function getRandomInt(max) {
@@ -27,7 +30,7 @@ function getFoodInfo(index){
   return foodArr[index]
 }
 
-function createRow(province, town, name){
+function createRow(province, town, name, menu_index){
   return {
     "全国地方公共団体コード": "011011",
     "都道府県名": province,
@@ -36,16 +39,16 @@ function createRow(province, town, name){
     "学校名": name,
     "学年": "小学校中学年",
     "レコードID": 1,
-    "年月日": "2019-08-01",
+    "年月日": dayjs().format('YYYY-MM-DD'),
     "献立ID": "",
-    "料理ID": "",
-    "料理名称": "",
+    "料理ID": menu_index,
+    "料理名称": foodArr[menu_index].menu_item_name,
     "同一料理内通し番号": 1,
     "食品ID": "",
-    "食品名称(成分表)": foodArr[0].ingredient_standard_name,
-    "食品名称(独自)": foodArr[0].ingredient_local_name,
-    "食品群(6群)": foodArr[0].food_group_6,
-    "食品群(3群)": foodArr[0].food_group_3,
+    "食品名称(成分表)": foodArr[menu_index].ingredient_standard_name,
+    "食品名称(独自)": foodArr[menu_index].ingredient_local_name,
+    "食品群(6群)": foodArr[menu_index].food_group_6,
+    "食品群(3群)": foodArr[menu_index].food_group_3,
     "分量": getRandomInt(1000),
     "エネルギー": getRandomInt(1000),
     "タンパク質": getRandomInt(100)/10,
@@ -66,8 +69,8 @@ function createRow(province, town, name){
     "亜鉛": "",
     "炭水化物": "",
     "糖質量": "",
-    "アレルゲン情報公開・非公開": "",
-    "アレルゲン品目": "",
+    "アレルゲン情報公開・非公開": 1,
+    "アレルゲン品目": foodArr[menu_index].allergens,
     "調理方法（料理単位）": "",
     "調理方法（食材単位）": "",
     "備考": ""
@@ -90,8 +93,8 @@ function createRow(province, town, name){
     )
   }
   schoolArr.forEach((school)=>{
-    for(let i=0; i<menu_count; i++){
-      data.push(createRow(school.province, school.town, school.name))
+    for(let i=0; i<foodArr.length; i++){
+      data.push(createRow(school.province, school.town, school.name, i))
     }
   })
 

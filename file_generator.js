@@ -81,10 +81,10 @@ function createRow(province, town, name, day_index, menu_index,){
 (async () => {
   const data = []
   //学校の配列を生成
+  const province =  faker.address.state()
+  const town = faker.address.city()
   const schoolArr = []
   for(let i=0; i<= school_count; i++){
-      const province =  faker.address.state()
-      const town = faker.address.city()
       const schoolName = faker.name.lastName() + "小学校"
       schoolArr.push({
         province: province,
